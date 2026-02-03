@@ -104,7 +104,14 @@ router.get('/edit', ensureLoggedIn, async (req, res) => {
  */
 router.post('/okta', ensureLoggedIn, async (req, res) => {
   try {
-    const userId = req.user.id;
+    // Try multiple ways to get the Okta user ID
+    const userId = req.user.id ||
+                   (req.user._json && req.user._json.sub) ||
+                   req.user.sub;
+
+    console.log('Attempting Okta profile update for user:', userId);
+    console.log('User object keys:', Object.keys(req.user));
+
     const { firstName, lastName, mobilePhone } = req.body;
 
     // Validate input
@@ -118,7 +125,13 @@ router.post('/okta', ensureLoggedIn, async (req, res) => {
     }
 
     if (!isOktaApiAvailable()) {
+      console.log('Okta API not available');
       return res.redirect('/profile/edit?error=okta_not_configured');
+    }
+
+    if (!userId) {
+      console.log('No user ID found in session');
+      return res.redirect('/profile/edit?error=no_user_id');
     }
 
     // Update Okta profile
@@ -131,7 +144,8 @@ router.post('/okta', ensureLoggedIn, async (req, res) => {
 
     res.redirect('/profile?success=okta_updated');
   } catch (error) {
-    console.error('Okta update error:', error);
+    console.error('Okta update error:', error.message);
+    console.error('Full error:', error);
     res.redirect('/profile/edit?error=okta_update_failed');
   }
 });
