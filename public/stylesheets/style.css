@@ -690,6 +690,33 @@ a:hover {
   margin-top: 5px;
 }
 
+/* MFA Required Page */
+.mfa-message {
+  padding: 20px 0;
+}
+
+.mfa-message p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.mfa-message ul {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+.mfa-message li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.mfa-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+}
+
 /* Row layout for forms */
 .row {
   display: flex;

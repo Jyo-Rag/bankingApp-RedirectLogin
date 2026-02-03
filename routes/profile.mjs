@@ -4,8 +4,8 @@ import { getUserPreferences, createUserPreferences, updateUserPreferences } from
 
 const router = express.Router();
 
-// Re-authentication timeout (5 minutes)
-const REAUTH_TIMEOUT = 5 * 60 * 1000;
+// MFA verification timeout (5 minutes)
+const MFA_TIMEOUT = 5 * 60 * 1000;
 
 /**
  * Middleware to ensure user is logged in
@@ -18,21 +18,22 @@ function ensureLoggedIn(req, res, next) {
 }
 
 /**
- * Middleware to ensure user has recently re-authenticated
+ * Middleware to ensure user has completed MFA step-up authentication
  * Required for sensitive operations like profile editing
  */
-function ensureRecentAuth(req, res, next) {
-  const recentlyAuthenticated = req.session.recentlyAuthenticated;
+function ensureMfaVerified(req, res, next) {
+  const mfaVerified = req.session.mfaVerified;
+  const mfaVerifiedAt = req.session.mfaVerifiedAt;
   const now = Date.now();
 
-  if (recentlyAuthenticated && (now - recentlyAuthenticated) < REAUTH_TIMEOUT) {
-    // User has recently re-authenticated
+  if (mfaVerified && mfaVerifiedAt && (now - mfaVerifiedAt) < MFA_TIMEOUT) {
+    // User has recently completed MFA
     return next();
   }
 
-  // Require re-authentication
-  console.log('Re-authentication required for profile edit');
-  res.redirect('/reauth');
+  // Require MFA step-up authentication
+  console.log('MFA step-up required for profile edit');
+  res.redirect('/stepup-mfa');
 }
 
 /**
@@ -83,7 +84,7 @@ router.get('/', ensureLoggedIn, async (req, res) => {
 /**
  * GET /profile/edit - Display edit form (requires recent re-authentication)
  */
-router.get('/edit', ensureLoggedIn, ensureRecentAuth, async (req, res) => {
+router.get('/edit', ensureLoggedIn, ensureMfaVerified, async (req, res) => {
   try {
     const userId = req.user.id;
     const email = getUserEmail(req.user);
@@ -123,7 +124,7 @@ router.get('/edit', ensureLoggedIn, ensureRecentAuth, async (req, res) => {
 /**
  * POST /profile/okta - Update Okta profile (requires recent re-authentication)
  */
-router.post('/okta', ensureLoggedIn, ensureRecentAuth, async (req, res) => {
+router.post('/okta', ensureLoggedIn, ensureMfaVerified, async (req, res) => {
   try {
     // Try multiple ways to get the Okta user ID
     const userId = req.user.id ||
@@ -174,7 +175,7 @@ router.post('/okta', ensureLoggedIn, ensureRecentAuth, async (req, res) => {
 /**
  * POST /profile/preferences - Update local preferences (requires recent re-authentication)
  */
-router.post('/preferences', ensureLoggedIn, ensureRecentAuth, async (req, res) => {
+router.post('/preferences', ensureLoggedIn, ensureMfaVerified, async (req, res) => {
   try {
     const userId = req.user.id;
 

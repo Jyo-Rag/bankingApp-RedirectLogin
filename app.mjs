@@ -91,20 +91,29 @@ axios
         return done(null, profile);
       }));
 
-      // Set up passport - step-up re-authentication (forces login prompt)
-      passport.use('oidc-reauth', new Strategy({
+      // Set up passport - step-up MFA authentication
+      // Uses acr_values to require multi-factor authentication
+      // See: https://developer.okta.com/docs/guides/step-up-authentication/main/
+      passport.use('oidc-mfa', new Strategy({
         issuer,
         authorizationURL: authorization_endpoint,
         tokenURL: token_endpoint,
         userInfoURL: userinfo_endpoint,
         clientID: CLIENT_ID,
         clientSecret: CLIENT_SECRET,
-        callbackURL: `${APP_BASE_URL}/authorization-code/callback-reauth`,
+        callbackURL: `${APP_BASE_URL}/authorization-code/callback-mfa`,
         scope: 'openid profile email',
-        prompt: 'login',  // Force re-authentication
+        // Step-up authentication parameters
+        acrValues: 'urn:okta:loa:2fa:any',  // Require 2FA with any factor
+        maxAge: 0,  // Force fresh authentication
       }, (issuer, profile, context, idToken, accessToken, params, done) => {
-        console.log('Re-authentication successful for:', profile.displayName);
+        console.log('MFA step-up authentication successful for:', profile.displayName);
+        console.log('ACR claim:', context?.acr || 'not present');
+        console.log('AMR claim:', context?.amr || 'not present');
         id_token = idToken;
+        // Store the authentication context for verification
+        profile.mfaVerified = true;
+        profile.authTime = context?.auth_time || Date.now();
         return done(null, profile);
       }));
     }
@@ -168,19 +177,28 @@ app.use('/authorization-code/callback',
   }
 );
 
-// Step-up re-authentication for sensitive operations
-app.get('/reauth', ensureLoggedIn, passport.authenticate('oidc-reauth'));
+// Step-up MFA authentication for sensitive operations
+app.get('/stepup-mfa', ensureLoggedIn, passport.authenticate('oidc-mfa'));
 
-// Callback for re-authentication
-app.use('/authorization-code/callback-reauth',
-  passport.authenticate('oidc-reauth', { failureMessage: true, failWithError: true }),
+// Callback for MFA step-up authentication
+app.use('/authorization-code/callback-mfa',
+  passport.authenticate('oidc-mfa', { failureMessage: true, failWithError: true }),
   (req, res) => {
-    // Mark session as recently re-authenticated
-    req.session.recentlyAuthenticated = Date.now();
-    console.log('User re-authenticated, redirecting to profile edit');
+    // Mark session as MFA verified
+    req.session.mfaVerified = true;
+    req.session.mfaVerifiedAt = Date.now();
+    console.log('User completed MFA step-up, redirecting to profile edit');
     res.redirect('/profile/edit');
   }
 );
+
+// Handle MFA authentication errors (user doesn't have MFA enrolled)
+app.get('/mfa-required', (req, res) => {
+  res.render('mfa-required', {
+    authenticated: req.isAuthenticated(),
+    user: req.user
+  });
+});
 
 // Profile routes (view, edit, update)
 app.use('/profile', profileRouter);

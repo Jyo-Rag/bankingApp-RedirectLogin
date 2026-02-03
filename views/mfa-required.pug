@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  div.account-detail-card
+    div.account-header
+      h3 Multi-Factor Authentication Required
+      span.account-status Security
+
+    div.mfa-message
+      p To edit your profile, you must complete multi-factor authentication (MFA).
+
+      p If you haven't enrolled in MFA yet, please contact your administrator or set up MFA in your Okta account settings.
+
+      h4 Why is MFA required?
+      ul
+        li Protects your account from unauthorized changes
+        li Verifies your identity before sensitive operations
+        li Required by security policy for profile modifications
+
+      div.mfa-actions
+        a.btn.btn-bank(href="/stepup-mfa") Try MFA Again
+        a.btn.btn-secondary(href="/profile") Back to Profile
