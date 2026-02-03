@@ -1,0 +1,172 @@
+extends layout
+
+block content
+  h2.page-header Edit Profile
+
+  //- Error messages
+  if error
+    div.alert.alert-danger
+      case error
+        when 'name_required'
+          | First name and last name are required.
+        when 'invalid_phone'
+          | Please enter a valid phone number.
+        when 'okta_update_failed'
+          | Failed to update profile. Please try again.
+        when 'okta_not_configured'
+          | Profile updates are not configured. Contact administrator.
+        when 'preferences_update_failed'
+          | Failed to save preferences. Please try again.
+        when 'load_failed'
+          | Failed to load profile data.
+        default
+          | An error occurred: #{error}
+
+  div.row
+    //- Okta Profile Section (Name, Phone)
+    div.col-md-6
+      div.account-detail-card
+        div.account-header
+          h3 Personal Information
+          span.account-status Okta Profile
+
+        if oktaApiAvailable
+          form(method="POST" action="/profile/okta")
+            div.form-group
+              label(for="firstName") First Name *
+              input#firstName.form-control(
+                type="text"
+                name="firstName"
+                value=oktaProfile.firstName || user.name?.givenName || ''
+                required
+              )
+
+            div.form-group
+              label(for="lastName") Last Name *
+              input#lastName.form-control(
+                type="text"
+                name="lastName"
+                value=oktaProfile.lastName || user.name?.familyName || ''
+                required
+              )
+
+            div.form-group
+              label(for="email") Email
+              input#email.form-control(
+                type="email"
+                value=user.email || user._json?.email || ''
+                disabled
+              )
+              small.text-muted Email cannot be changed here.
+
+            div.form-group
+              label(for="mobilePhone") Mobile Phone
+              input#mobilePhone.form-control(
+                type="tel"
+                name="mobilePhone"
+                value=oktaProfile.mobilePhone || ''
+                placeholder="(555) 123-4567"
+              )
+
+            button.btn.btn-bank(type="submit") Update Profile
+        else
+          p.text-muted Profile editing requires Okta Management API configuration.
+          div.account-info-grid
+            div.info-item
+              label Name
+              p #{user.displayName || 'N/A'}
+            div.info-item
+              label Email
+              p #{user.email || user._json?.email || 'N/A'}
+
+    //- App Preferences Section
+    div.col-md-6
+      div.account-detail-card
+        div.account-header
+          h3 App Preferences
+          span.account-status Local Settings
+
+        form(method="POST" action="/profile/preferences")
+          h4 Notifications
+
+          div.checkbox
+            label
+              input(
+                type="checkbox"
+                name="email_notifications"
+                checked=preferences.email_notifications
+              )
+              |  Email Notifications
+
+          div.checkbox
+            label
+              input(
+                type="checkbox"
+                name="sms_notifications"
+                checked=preferences.sms_notifications
+              )
+              |  SMS Notifications
+
+          div.checkbox
+            label
+              input(
+                type="checkbox"
+                name="push_notifications"
+                checked=preferences.push_notifications
+              )
+              |  Push Notifications
+
+          div.checkbox
+            label
+              input(
+                type="checkbox"
+                name="transaction_alerts"
+                checked=preferences.transaction_alerts
+              )
+              |  Transaction Alerts
+
+          div.checkbox
+            label
+              input(
+                type="checkbox"
+                name="marketing_emails"
+                checked=preferences.marketing_emails
+              )
+              |  Marketing Emails
+
+          hr
+
+          h4 Display Settings
+
+          div.form-group
+            label(for="theme") Theme
+            select#theme.form-control(name="theme")
+              option(value="light" selected=(preferences.theme === 'light')) Light
+              option(value="dark" selected=(preferences.theme === 'dark')) Dark
+
+          div.form-group
+            label(for="language") Language
+            select#language.form-control(name="language")
+              option(value="en" selected=(preferences.language === 'en')) English
+              option(value="es" selected=(preferences.language === 'es')) Spanish
+              option(value="fr" selected=(preferences.language === 'fr')) French
+
+          div.form-group
+            label(for="currency_display") Currency Display
+            select#currency_display.form-control(name="currency_display")
+              option(value="USD" selected=(preferences.currency_display === 'USD')) USD ($)
+              option(value="EUR" selected=(preferences.currency_display === 'EUR')) EUR
+              option(value="GBP" selected=(preferences.currency_display === 'GBP')) GBP
+
+          div.form-group
+            label(for="date_format") Date Format
+            select#date_format.form-control(name="date_format")
+              option(value="MM/DD/YYYY" selected=(preferences.date_format === 'MM/DD/YYYY')) MM/DD/YYYY
+              option(value="DD/MM/YYYY" selected=(preferences.date_format === 'DD/MM/YYYY')) DD/MM/YYYY
+              option(value="YYYY-MM-DD" selected=(preferences.date_format === 'YYYY-MM-DD')) YYYY-MM-DD
+
+          button.btn.btn-bank(type="submit") Save Preferences
+
+  div.row
+    div.col-md-12
+      a.btn.btn-secondary(href="/profile") Back to Profile

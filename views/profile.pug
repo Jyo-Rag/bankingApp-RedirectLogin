@@ -3,6 +3,25 @@ extends layout
 block content
   h2.page-header My Accounts
 
+  //- Success/Error messages
+  if success
+    div.alert.alert-success
+      case success
+        when 'okta_updated'
+          | Your profile has been updated successfully.
+        when 'preferences_updated'
+          | Your preferences have been saved.
+        default
+          | Changes saved successfully.
+
+  if error
+    div.alert.alert-danger
+      case error
+        when 'load_failed'
+          | Unable to load some profile data.
+        default
+          | An error occurred: #{error}
+
   div.row
     div.col-md-8
       div.account-detail-card
@@ -24,7 +43,33 @@ block content
             label Account Type
             p Premium Checking
 
-        h4 Security Information
+      //- Preferences Summary Card
+      if preferences && (preferences.theme || preferences.language)
+        div.account-detail-card
+          div.account-header
+            h3 Your Preferences
+            span.account-status Saved
+
+          div.account-info-grid
+            div.info-item
+              label Theme
+              p #{preferences.theme === 'dark' ? 'Dark' : 'Light'}
+            div.info-item
+              label Language
+              p #{preferences.language === 'es' ? 'Spanish' : preferences.language === 'fr' ? 'French' : 'English'}
+            div.info-item
+              label Notifications
+              - var notifCount = (preferences.email_notifications ? 1 : 0) + (preferences.sms_notifications ? 1 : 0) + (preferences.push_notifications ? 1 : 0)
+              p #{notifCount} enabled
+            div.info-item
+              label Transaction Alerts
+              p #{preferences.transaction_alerts ? 'Enabled' : 'Disabled'}
+
+      div.account-detail-card
+        div.account-header
+          h3 Security Information
+          span.account-status Protected
+
         table.table.table-striped
           thead
             tr
@@ -56,5 +101,5 @@ block content
       div.sidebar-card
         h4 Quick Actions
         a.btn.btn-bank.btn-block(href="#") Download Statement
-        a.btn.btn-bank.btn-block(href="#") Update Profile
+        a.btn.btn-bank.btn-block(href="/profile/edit") Update Profile
         a.btn.btn-bank.btn-block(href="#") Security Settings

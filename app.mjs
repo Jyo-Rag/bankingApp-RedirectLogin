@@ -27,6 +27,7 @@ const APP_BASE_URL = BASE_URL || 'http://localhost:3000';
 const REVOCATION_ENDPOINT = `${APP_BASE_URL}/api/global-token-revocation`;
 
 import homeRoute from './routes/index.js';
+import profileRouter from './routes/profile.mjs';
 const app = express();
 
 // view engine setup
@@ -150,9 +151,8 @@ app.use('/authorization-code/callback',
   }
 );
 
-app.use('/profile', ensureLoggedIn, (req, res) => {
-  res.render('profile', { authenticated: req.isAuthenticated(), user: req.user });
-});
+// Profile routes (view, edit, update)
+app.use('/profile', profileRouter);
 
 app.post('/logout', (req, res, next) => {
   // Unregister the session from Universal Logout tracking
