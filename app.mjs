@@ -28,6 +28,7 @@ const REVOCATION_ENDPOINT = `${APP_BASE_URL}/api/global-token-revocation`;
 
 import homeRoute from './routes/index.js';
 import profileRouter from './routes/profile.mjs';
+import wireTransferRouter from './routes/wire-transfer.mjs';
 const app = express();
 
 // view engine setup
@@ -182,13 +183,15 @@ app.get('/stepup-mfa', ensureLoggedIn, passport.authenticate('oidc-mfa'));
 
 // Callback for MFA step-up authentication
 app.use('/authorization-code/callback-mfa',
-  passport.authenticate('oidc-mfa', { failureMessage: true, failWithError: true }),
+  passport.authenticate('oidc-mfa', { failureMessage: true, failWithError: true, keepSessionInfo: true }),
   (req, res) => {
     // Mark session as MFA verified
     req.session.mfaVerified = true;
     req.session.mfaVerifiedAt = Date.now();
-    console.log('User completed MFA step-up, redirecting to profile edit');
-    res.redirect('/profile/edit');
+    const returnUrl = req.session.mfaReturnUrl || '/profile/edit';
+    delete req.session.mfaReturnUrl;
+    console.log(`User completed MFA step-up, redirecting to ${returnUrl}`);
+    res.redirect(returnUrl);
   }
 );
 
@@ -202,6 +205,9 @@ app.get('/mfa-required', (req, res) => {
 
 // Profile routes (view, edit, update)
 app.use('/profile', profileRouter);
+
+// Wire transfer routes
+app.use('/wire-transfer', wireTransferRouter);
 
 app.post('/logout', (req, res, next) => {
   // Unregister the session from Universal Logout tracking

@@ -1,0 +1,65 @@
+extends layout
+
+block content
+  h2.page-header Wire Transfer Confirmation
+
+  div.alert.alert-success
+    strong Wire transfer submitted successfully!
+    |  Your transfer is being processed.
+
+  div.row
+    div.col-md-8
+      div.account-detail-card
+        div.account-header
+          h3 Transfer Summary
+          span.account-status Submitted
+
+        div.transfer-summary
+          div.summary-row
+            span.summary-label Reference Number
+            span.summary-value
+              strong #{transfer.refNumber}
+          div.summary-row
+            span.summary-label Date &amp; Time
+            span.summary-value #{transfer.timestamp}
+          div.summary-row
+            span.summary-label From Account
+            span.summary-value #{transfer.fromAccount}
+          div.summary-row
+            span.summary-label Recipient Name
+            span.summary-value #{transfer.recipientName}
+          div.summary-row
+            span.summary-label Recipient Bank
+            span.summary-value #{transfer.recipientBank}
+          div.summary-row
+            span.summary-label Routing Number
+            span.summary-value #{transfer.routingNumber}
+          div.summary-row
+            span.summary-label Account Number
+            span.summary-value #{transfer.accountNumber}
+          div.summary-row
+            span.summary-label Memo
+            span.summary-value #{transfer.memo}
+          hr
+          div.summary-row.summary-total
+            span.summary-label Transfer Amount
+            span.summary-value $#{transfer.amount}
+
+    div.col-md-4
+      div.sidebar-card
+        h4 What's Next?
+        p Your wire transfer has been queued for processing.
+        hr
+        p
+          strong Processing Time:
+          |  1-2 business days
+        p
+          strong Confirmation:
+          |  You will receive an email once the transfer has been completed.
+        p.text-muted Keep your reference number for your records. Contact us at 1-800-SECURE-1 if you have questions.
+
+  div.row
+    div.col-md-12
+      a.btn.btn-bank(href="/wire-transfer") Initiate Another Transfer
+      |
+      a.btn.btn-secondary(href="/") Back to Dashboard

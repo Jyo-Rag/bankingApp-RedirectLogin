@@ -232,6 +232,78 @@ body {
   color: var(--primary-color);
 }
 
+/* Quick Actions Grid (5 items) */
+.quick-actions-grid {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  padding: 0 15px;
+}
+
+.quick-actions-grid .action-card {
+  flex: 1;
+}
+
+.action-card-link {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.action-card-link:hover,
+.action-card-link:focus {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Wire Transfer Form */
+.wire-transfer-form .form-group {
+  margin-bottom: 20px;
+}
+
+/* Transfer Confirmation Summary */
+.transfer-summary {
+  padding: 10px 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.summary-value {
+  color: var(--text-dark);
+  text-align: right;
+}
+
+.summary-total {
+  font-size: 18px;
+  padding-top: 15px;
+}
+
+.summary-total .summary-label {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.summary-total .summary-value {
+  color: var(--secondary-color);
+  font-weight: 700;
+  font-size: 22px;
+}
+
 /* Recent Transactions */
 .recent-transactions {
   margin-top: 40px;
@@ -606,6 +678,19 @@ a:hover {
   box-sizing: border-box;
 }
 
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+  cursor: pointer;
+  height: auto;
+  line-height: 1.5;
+}
+
 .form-control:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.1);
@@ -781,5 +866,14 @@ a:hover {
   .col-md-8 {
     flex: 0 0 100%;
     max-width: 100%;
+  }
+
+  .quick-actions-grid {
+    flex-wrap: wrap;
+  }
+
+  .quick-actions-grid .action-card,
+  .action-card-link {
+    flex: 0 0 calc(50% - 10px);
   }
 }

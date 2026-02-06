@@ -1,0 +1,119 @@
+extends layout
+
+block content
+  h2.page-header Initiate Wire Transfer
+
+  if error
+    div.alert.alert-danger
+      | #{error}
+
+  div.row
+    div.col-md-8
+      div.account-detail-card
+        div.account-header
+          h3 Wire Transfer Details
+          span.account-status New Transfer
+
+        form(method="POST" action="/wire-transfer")
+          h4 Source Account
+          div.form-group
+            label(for="fromAccount") From Account *
+            select#fromAccount.form-control(name="fromAccount" required)
+              option(value="" disabled selected=(!(formData && formData.fromAccount))) Select an account
+              each account in accounts
+                option(value=account.id selected=(formData && formData.fromAccount === account.id))
+                  | #{account.label} — $#{account.balance.toFixed(2)}
+
+          hr
+
+          h4 Recipient Information
+          div.form-group
+            label(for="recipientName") Recipient Name *
+            input#recipientName.form-control(
+              type="text"
+              name="recipientName"
+              value=(formData && formData.recipientName || '')
+              placeholder="Full name of the recipient"
+              required
+            )
+
+          div.form-group
+            label(for="recipientBank") Recipient Bank Name *
+            input#recipientBank.form-control(
+              type="text"
+              name="recipientBank"
+              value=(formData && formData.recipientBank || '')
+              placeholder="Name of the receiving bank"
+              required
+            )
+
+          div.row
+            div.col-md-6
+              div.form-group
+                label(for="routingNumber") Routing Number (ABA) *
+                input#routingNumber.form-control(
+                  type="text"
+                  name="routingNumber"
+                  value=(formData && formData.routingNumber || '')
+                  placeholder="9-digit routing number"
+                  maxlength="9"
+                  pattern="\\d{9}"
+                  required
+                )
+            div.col-md-6
+              div.form-group
+                label(for="accountNumber") Account Number *
+                input#accountNumber.form-control(
+                  type="text"
+                  name="accountNumber"
+                  value=(formData && formData.accountNumber || '')
+                  placeholder="Recipient account number"
+                  required
+                )
+
+          hr
+
+          h4 Transfer Amount
+          div.form-group
+            label(for="amount") Amount (USD) *
+            input#amount.form-control(
+              type="number"
+              name="amount"
+              value=(formData && formData.amount || '')
+              placeholder="0.00"
+              step="0.01"
+              min="0.01"
+              required
+            )
+
+          div.form-group
+            label(for="memo") Memo / Reference
+            input#memo.form-control(
+              type="text"
+              name="memo"
+              value=(formData && formData.memo || '')
+              placeholder="Optional reference or memo"
+            )
+
+          button.btn.btn-bank(type="submit") Submit Wire Transfer
+
+    div.col-md-4
+      div.sidebar-card
+        h4 Wire Transfer Info
+        p Wire transfers are typically processed within 1-2 business days.
+        hr
+        p
+          strong Daily Limit:
+          |  $50,000.00
+        p
+          strong Cut-off Time:
+          |  4:00 PM EST
+        p
+          strong Fee:
+          |  $25.00 per domestic wire
+        hr
+        p.text-muted For international wire transfers or amounts exceeding the daily limit, please contact us at 1-800-SECURE-1.
+
+  div.row
+    div.col-md-12
+      a.btn.btn-secondary(href="/") Back to Dashboard

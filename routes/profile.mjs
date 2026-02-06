@@ -33,6 +33,7 @@ function ensureMfaVerified(req, res, next) {
 
   // Require MFA step-up authentication
   console.log('MFA step-up required for profile edit');
+  req.session.mfaReturnUrl = '/profile/edit';
   res.redirect('/stepup-mfa');
 }
 
