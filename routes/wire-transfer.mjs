@@ -39,6 +39,7 @@ const SOURCE_ACCOUNTS = [
 router.get('/', ensureLoggedIn, ensureMfaVerified, (req, res) => {
   res.render('wire-transfer', {
     authenticated: req.isAuthenticated(),
+    user: req.user,
     accounts: SOURCE_ACCOUNTS,
     error: req.query.error || null,
     formData: {}
@@ -85,6 +86,7 @@ router.post('/', ensureLoggedIn, (req, res) => {
   if (errors.length > 0) {
     return res.render('wire-transfer', {
       authenticated: req.isAuthenticated(),
+      user: req.user,
       accounts: SOURCE_ACCOUNTS,
       error: errors.join(' '),
       formData: req.body
@@ -100,6 +102,7 @@ router.post('/', ensureLoggedIn, (req, res) => {
 
   res.render('wire-transfer-confirm', {
     authenticated: req.isAuthenticated(),
+    user: req.user,
     transfer: {
       fromAccount: sourceAccount.label,
       recipientName: recipientName.trim(),

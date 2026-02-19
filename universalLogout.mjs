@@ -74,16 +74,25 @@ async function validateLogoutToken(token, expectedAudience, expectedIssuer) {
   // Get the signing key
   const signingKey = await getSigningKey(decoded.header);
 
-  // Verify the token
+  // Verify the token (skip audience in jwt.verify; we check it manually below
+  // to normalize double-slash URLs that Okta may produce in the aud claim)
   return new Promise((resolve, reject) => {
     jwt.verify(token, signingKey, {
       algorithms: ['RS256', 'RS384', 'RS512'],
       issuer: expectedIssuer,
-      audience: expectedAudience,
       clockTolerance: 30 // Allow 30 seconds of clock skew
     }, (err, payload) => {
       if (err) {
         reject(err);
+        return;
+      }
+      // Normalize URLs before comparing (replace double-slashes, preserving protocol)
+      const normalize = (url) => url.replace(/([^:])\/\/+/g, '$1/');
+      if (normalize(payload.aud) !== normalize(expectedAudience)) {
+        reject(Object.assign(
+          new Error(`jwt audience invalid. expected: ${normalize(expectedAudience)}`),
+          { name: 'JsonWebTokenError' }
+        ));
         return;
       }
       resolve(payload);

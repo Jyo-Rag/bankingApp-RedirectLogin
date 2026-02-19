@@ -23,7 +23,7 @@ html
         if authenticated
           ul.nav.navbar-nav.navbar-right
             li.welcome-text
-              span Welcome back!
+              span Welcome back, #{user && user.displayName ? user.displayName : 'User'}!
             li
               form.navbar-form(method="post", action="/logout", style="margin: 0;")
                 button#logout-button.btn.btn-logout(type="submit") Sign Out
