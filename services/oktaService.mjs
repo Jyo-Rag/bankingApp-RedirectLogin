@@ -1,4 +1,4 @@
-import * as okta from '@okta/okta-sdk-nodejs';
+import okta from '@okta/okta-sdk-nodejs';
 import dotenv from 'dotenv';
 
 // Load from .okta.env for local development
